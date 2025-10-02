@@ -12,7 +12,7 @@ export function UserList() {
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:3001/users")
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`)
             .then((response) => response.json())
             .then((data) => {
                 setUsers(data);
@@ -20,13 +20,29 @@ export function UserList() {
     }, []);
 
     const handleDelete = (id: number) => {
-        fetch(`http://localhost:3001/users/${id}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
             method: "DELETE",
         }).then((response) => {
             if (response.ok) {
                 setUsers(users.filter((user) => user.id !== id));
             }
         });
+    };
+
+    const handleUpdate = (id: number, newName: string) => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ nome: newName }),
+        })
+            .then((response) => response.json())
+            .then((updatedUser) => {
+                setUsers(
+                    users.map((user) => (user.id === id ? updatedUser : user))
+                );
+            });
     };
 
     return (
@@ -40,6 +56,7 @@ export function UserList() {
                         key={user.id}
                         user={user}
                         onDelete={handleDelete}
+                        onUpdate={handleUpdate}
                     />
                 ))}
             </ul>
